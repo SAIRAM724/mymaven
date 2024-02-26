@@ -1,0 +1,44 @@
+pipeline
+{
+    agent any
+    stages
+    {
+        stage('contdownload')
+        {
+            steps
+            {
+                git 'https://github.com/intelliqittrainings/maven.git'
+            }
+        }
+        stage('contbuild')
+        {
+            steps
+            {
+                sh 'mvn package'
+            }
+        }
+        stage('contdeployment')
+        {
+            steps
+            {
+                deploy adapters: [tomcat9(credentialsId: 'e57f6769-acd8-4c5d-8ce4-91ceb80aea31', path: '', url: 'http://172.31.40.136:8080')], contextPath: 'testapp', war: '**/*.war'
+            }
+        }
+        stage('conttesting')
+        {
+            steps
+            {
+                git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+                sh 'java -jar /var/lib/jenkins/workspace/declarativepipeline1/testing.jar'
+            }
+        }
+        stage('contdelivery')
+        {
+            steps
+            {
+                deploy adapters: [tomcat9(credentialsId: 'e57f6769-acd8-4c5d-8ce4-91ceb80aea31', path: '', url: 'http://172.31.34.132:8080')], contextPath: 'prodapp', war: '**/*.war'
+            }
+        }
+    
+    }
+}
